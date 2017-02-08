@@ -62,4 +62,5 @@ class Sales(Base):
     def __str__(self):
         sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} date_enter={}"
         return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold, self.date_enter)
-    Base.metadata.create_all(engine)
+
+Base.metadata.create_all(engine)

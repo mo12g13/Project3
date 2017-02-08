@@ -132,7 +132,8 @@ def add_sale_info(sale_session):
             print("Successfully added to the database")
             session.close()
             break
-        except:
+        except Exception as e:
+            print(e)
             print("Error saving data to the databases")
             sale_session.rollback() # Roll back to previous point in time since there was an error in saving the user data
             sale_info.id=None
