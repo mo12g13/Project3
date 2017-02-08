@@ -52,7 +52,7 @@ def get_valid_user_input(display_message):
     return user_input
 
 # A method that checks and make the user enter a valid Integer
-def get_quanty_amount(display_message):
+def get_integer(display_message):
     user_input_enter =''
     while  True:
         try:
@@ -107,7 +107,7 @@ def add_new_game_location_info(new_session):
 def add_new_merchandise_item(new_merchandise_session):
     new_item_name =get_valid_user_input("Please enter the name of this item: ")
     new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
-    quantities=get_quanty_amount('Please enter the quantity amount for {}'.format(new_item_name))
+    quantities=get_integer('Please enter the quantity amount for {}'.format(new_item_name))
     new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
     new_merchandise_session.add(new_merchandise)
     new_merchandise_session.commit()
@@ -115,6 +115,36 @@ def add_new_merchandise_item(new_merchandise_session):
      new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
     print("Successfully added to database")
     session.close()
+
+#A method the use to add venue_id, item_id and quantity for merchandise and game table
+def add_sale_info(sale_session):
+    while True:
+        try:
+
+            new_venue_id = get_integer("Please enter the venue id for game table: ")
+            new_item_id = get_integer("Please enter the item id from the merchandise talbe:  ")
+            total_quanity_amount = get_integer("Please enter the quantity that was sold from the sales table: ")
+            sale_info = Sales(venue_id=new_venue_id, item_id=new_item_id, quantity_sold=total_quanity_amount)
+            sale_session.add(sale_info)
+            sale_session.commit()
+            print("Sales id: {} Venue id: {} Item id: {} Total Quanity: {}".format(sale_info.id, sale_info.venue_id,
+            sale_info.item_id, sale_info.total_quanity_amount, sale_info.date_enter))
+            print("Successfully added to the database")
+            session.close()
+            break
+        except:
+            print("Error saving data to the databases")
+            sale_session.rollback() # Roll back to previous point in time since there was an error in saving the user data
+            sale_info.id=None
+            sale_info.venue_id=None
+            sale_info.item_id=None
+            sale_info.date_enter=None
+            sale_info.total_quanity_amount=None
+            continue
+
+
+
+
 
 
 
@@ -124,7 +154,9 @@ game_three= Game(stadium='Bryant–Denny Stadium', game_location='Tuscaloosa', g
 game_four = Game(stadium='Cotton Bowl', game_location='Dallas', game_date='2017-12-13')
 
 
-
-add_new_merchandise_item(session)
+for game in session.query(Game):
+    print(game)
+add_sale_info(session)
+# add_new_merchandise_item(session)
 # add_new_game_location_info(session)
 # merchand = Merchandise(item_decription='Hat', item_price=4.50)

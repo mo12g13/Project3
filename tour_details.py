@@ -53,15 +53,13 @@ class Sales(Base):
     venue_id = Column(Integer(), ForeignKey('game_schedule.venue_id'))
     item_id = Column(Integer(), ForeignKey('merchandise.id'))
     quantity_sold = Column(Integer(), nullable=False)
+    date_enter = Column(DATE(), default=datetime.now)
 
+    #Establishing of various tables relationship. Sales table referencing game and merchandise tables
     game = relationship('Game', backref=backref('sale', order_by=id))
     merchandise = relationship('Merchandise', backref=backref('sale', order_by=id))
 
     def __str__(self):
-        sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} "
-        return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold)
-
-
-
-
-Base.metadata.create_all(engine)
+        sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} date_enter={}"
+        return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold, self.date_enter)
+    Base.metadata.create_all(engine)
