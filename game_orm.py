@@ -3,22 +3,24 @@ from sqlalchemy.orm import sessionmaker
 from tour_details import Game, Merchandise, Sales
 import datetime
 
+#Connection of sqlite database for this project
 engine = create_engine('sqlite:///game_tour.db', echo=False)
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine) #session for this database
 session = Session()
 
-# A method that checks to make sure the date is in a specific format
+# A method that checks to make sure the date is in a specific format. Only 2017 is consider for this method
 
-def valid_date(display_message):
+def get_valid_date(display_message):
     date_enter=""
 
     while True:
+        date_enter=input(display_message)
         try:
-            date_enter=input(display_message)
-            if '/' in date_enter and len(date_enter)==10 and date_enter[0:4] is'2017' and len(date_enter[5:7])==2 and len(date_enter[8:])==2:
-                new_date = date_enter.split('/')
-                new_date = datetime.date(year=int(date_enter[0]), month=int(date_enter[1]), day=int(date_enter[2]))
 
+
+            if '/' in date_enter and len(date_enter)==10 and date_enter[0:4]=='2017' and len(date_enter[5:7])==2 and len(date_enter[8:])==2:
+                new_date =date_enter =date_enter.split('/')
+                new_date = datetime.date(year=int(date_enter[0]), month=int(date_enter[1]), day=int(date_enter[2]))
                 break
             elif '-' in date_enter and len(date_enter)==10 and date_enter[0:4]=='2017' and len(date_enter[5:7])==2 and len(date_enter[8:])==2:
                 new_date=date_enter=date_enter.split('-')
@@ -34,13 +36,8 @@ def valid_date(display_message):
     new_date.timetuple()
     return new_date
 
-valeud= valid_date("Please enter a date in the format YYYY-MM-DD/YYYY/MM/DD: ")
-
-print(valeud)
-
-
 #A method that validates the user input to make user the user enters a valid input
-def validate_user_input(display_message):
+def get_valid_user_input(display_message):
     user_input =""
     while True:
         user_input=input(display_message)
@@ -55,26 +52,70 @@ def validate_user_input(display_message):
     return user_input
 
 # A method that checks and make the user enter a valid Integer
-def valid_integer_enter(display_message):
+def get_quanty_amount(display_message):
     user_input_enter =''
     while  True:
         try:
             user_input_enter = int(input(display_message))
             if user_input_enter > 0:
                 pass
-            elif user_input_enter < 0:
+            elif user_input_enter < 0 or user_input_enter == 0:
                 print('Please  enter a value greater than zero')
                 continue
         except ValueError:
-            print("Please avoid entering characters. you were as to enter quantity")
+            print("Please avoid entering characters. you were asked to enter quantity amount")
             continue
         return user_input_enter
 
-number_enter = valid_integer_enter("Please enter quantity")
-print(number_enter)
+#A method that validate the user input to ensure that valid price was entered
+def get_price(message_display):
+    input_price=''
+    while True:
+            try:
+                input_price=float(input(message_display))
+                if input_price <0.00 or input_price == 0.00:
+                    print('Price must be number greater than zero')
+                    continue
+                elif input_price > 0:
+                    break
+                else:
+                    print("an input error occur, please review your input")
+                    continue
+            except ValueError:
+                print("Please enter decimal number! characters or invalid input can't be price")
+                continue
+    return input_price
 
-valid_input = validate_user_input("Please enter game date:")
-print(valid_input)
+
+
+# A method that adds a new game information to the database. For instance, if we have a new game information, the user can add that game information
+
+def add_new_game_location_info(new_session):
+    stadium_name = get_valid_user_input("Please enter the name for this stadium: ")
+    new_location = get_valid_user_input("Please enter the city where {} stadium is located: ".format(stadium_name))
+    game_schedule_date= get_valid_date('Please enter the schedule date for {} game. We only accept within 2017'.format(new_location))
+    new_game = Game(stadium=stadium_name, game_location=new_location, game_date=str(game_schedule_date))
+    new_session.add(new_game)
+    new_session.commit()
+
+    print("Venue id:{} Stadium: {} Game location: {} Game date: {} Date added {}".format(new_game.venue_id,
+    new_game.stadium, new_game.game_location,new_game.game_date,new_game.date_updated))
+    print("Successfully added to the database")
+    new_session.close()
+
+#A method that adds items to the merchandise table
+def add_new_merchandise_item(new_merchandise_session):
+    new_item_name =get_valid_user_input("Please enter the name of this item: ")
+    new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
+    quantities=get_quanty_amount('Please enter the quantity amount for {}'.format(new_item_name))
+    new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
+    new_merchandise_session.add(new_merchandise)
+    new_merchandise_session.commit()
+    print('Item id: {} Price: {} Quanty: {} Date added: {}'.format(new_merchandise.item_name,
+     new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
+    print("Successfully added to database")
+    session.close()
+
 
 
 game_one = Game(stadium='Vikings Stadium', game_location="Minneapolis",game_date='2017-11-04')
@@ -84,20 +125,6 @@ game_four = Game(stadium='Cotton Bowl', game_location='Dallas', game_date='2017-
 
 
 
-# session.add_all([game_one, game_two, game_three, game_four])
-
-session.commit()
-session.close()
-for game in session.query(Game):
-    print('venue id: '+ str(game.venue_id) + ' Game Date: '+ str(game.game_date) +' Game Location: '+ str(game.game_location) +" Date added: "+ str(game.date_updated.strftime("%d/%m/%y")))
-
+add_new_merchandise_item(session)
+# add_new_game_location_info(session)
 # merchand = Merchandise(item_decription='Hat', item_price=4.50)
-# session.add(merchand)
-# session.commit()
-#
-# print(merchand.id, merchand.item_decription, merchand.item_price)
-#
-# sale = Sales(quantity_sold=20)
-# session.add(sale)
-# session.commit()
-# print(sale.id,sale.venue_id, sale.item_id, sale.quantity_sold)

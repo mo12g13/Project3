@@ -19,6 +19,7 @@ Base = declarative_base()
 
 
 class Game(Base):
+    """A table that holds the schedule for each game"""
     __tablename__='game_schedule'
     venue_id = Column(Integer(), primary_key=True)
     stadium = Column(String(50), nullable=False)
@@ -32,17 +33,21 @@ class Game(Base):
 
 
 class Merchandise(Base):
+    """A table that stores the merchandise items each game tour"""
     __tablename__='merchandise'
     id = Column(Integer(), primary_key=True, nullable=False)
-    item_decription = Column(String(100), nullable=False)
+    item_name = Column(String(100), nullable=False)
     item_price = Column(Numeric(10, 2), nullable=False)
+    total_quantity = Column(Integer(), nullable= False)
+    date_added = Column(DATE(), default=datetime.now)
 
     # sale = relationship('Sales',back_populates='merchandise_item')
     def __str_(self):
-        merchandise_record ='Merchandise item id={} item_description={} item_price={}'
-        return merchandise_record.format(self.id, self.item_description, self.item_price)
+        merchandise_record ='Merchandise item id={} item_name={} item_description={} item_price={}, total_quantity={} date_added={}'
+        return merchandise_record.format(self.id, self.item_name, self.item_price, self.total_quantity, self.date_added)
 
 class Sales(Base):
+    """A table that holds sales information for each each merchandise item and game location"""
     __tablename__='sale'
     id = Column(Integer, primary_key=True, nullable=False)
     venue_id = Column(Integer(), ForeignKey('game_schedule.venue_id'))
