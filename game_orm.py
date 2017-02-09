@@ -3,21 +3,18 @@ from sqlalchemy.orm import sessionmaker
 from tour_details import Game, Merchandise, Sales
 import datetime
 
+
 #Connection of sqlite database for this project
 engine = create_engine('sqlite:///game_tour.db', echo=False)
 Session = sessionmaker(bind=engine) #session for this database
 session = Session()
-
 # A method that checks to make sure the date is in a specific format. Only 2017 is consider for this method
 
 def get_valid_date(display_message):
     date_enter=""
-
     while True:
         date_enter=input(display_message)
         try:
-
-
             if '/' in date_enter and len(date_enter)==10 and date_enter[0:4]=='2017' and len(date_enter[5:7])==2 and len(date_enter[8:])==2:
                 new_date =date_enter =date_enter.split('/')
                 new_date = datetime.date(year=int(date_enter[0]), month=int(date_enter[1]), day=int(date_enter[2]))
@@ -67,7 +64,7 @@ def get_integer(display_message):
             continue
         return user_input_enter
 
-#A method that validate the user input to ensure that valid price was entered
+#A method that validates the user input to ensure that valid price was entered
 def get_price(message_display):
     input_price=''
     while True:
@@ -87,40 +84,70 @@ def get_price(message_display):
     return input_price
 
 
-
 # A method that adds a new game information to the database. For instance, if we have a new game information, the user can add that game information
 
 def add_new_game_location_info(new_session):
-    stadium_name = get_valid_user_input("Please enter the name for this stadium: ")
-    new_location = get_valid_user_input("Please enter the city where {} stadium is located: ".format(stadium_name))
-    game_schedule_date= get_valid_date('Please enter the schedule date for {} game. We only accept within 2017'.format(new_location))
-    new_game = Game(stadium=stadium_name, game_location=new_location, game_date=str(game_schedule_date))
-    new_session.add(new_game)
-    new_session.commit()
+    while True:
+        try:
+            stadium_name = get_valid_user_input("Please enter the name for this stadium: ")
+            new_location = get_valid_user_input("Please enter the city where {} stadium is located: ".format(stadium_name))
+            game_schedule_date= get_valid_date('Please enter the schedule date for {} game. We only accept within 2017: '.format(new_location))
+            new_game = Game(stadium=stadium_name, game_location=new_location, game_date=str(game_schedule_date))
+            new_session.add(new_game)
+            new_session.commit()
 
-    print("Venue id:{} Stadium: {} Game location: {} Game date: {} Date added {}".format(new_game.venue_id,
-    new_game.stadium, new_game.game_location,new_game.game_date,new_game.date_updated))
-    print("Successfully added to the database")
-    new_session.close()
+            print("Venue id:{} Stadium: {} Game location: {} Game date: {} Date added {}".format(new_game.venue_id,
+            new_game.stadium, new_game.game_location,new_game.game_date,new_game.date_updated))
+            print("Successfully added to the database")
+            new_session.close()
+            break
+        except Exception as e:
+            print(e)
+            new_session.rollback() # rollback the database since there and error in saving the data
+            new_game.venue_id=None
+            new_game.stadium=None
+            new_game.game_location=None
+            new_game.game_date=None
+            new_game.date_updated=None
+            new_session.close()
+            continue
 
 #A method that adds items to the merchandise table
 def add_new_merchandise_item(new_merchandise_session):
-    new_item_name =get_valid_user_input("Please enter the name of this item: ")
-    new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
-    quantities=get_integer('Please enter the quantity amount for {}'.format(new_item_name))
-    new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
-    new_merchandise_session.add(new_merchandise)
-    new_merchandise_session.commit()
-    print('Item id: {} Price: {} Quanty: {} Date added: {}'.format(new_merchandise.item_name,
-     new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
-    print("Successfully added to database")
-    session.close()
+    while True:
+        try:
+            new_item_name =get_valid_user_input("Please enter the name of this item: ")
+            new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
+            quantities=get_integer('Please enter the quantity amount for {}'.format(new_item_name))
+            new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
+            new_merchandise_session.add(new_merchandise)
+            new_merchandise_session.commit()
+            print('Item id: {} Price: {} Quanty: {} Date added: {}'.format(new_merchandise.item_name,
+             new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
+            print("Successfully added to database")
+            new_merchandise_session.close()
+            break
+        except:
+            print("Error saving data to the database")
+            new_merchandise_session.rollback() #rollback to previous time. Set all fields to None since there was an error in saving the data
+            new_merchandise_session.id=None
+            new_merchandise_session.item_name=None
+            new_merchandise.item_price=None
+            new_merchandise_session.total_quantity=None
+            new_merchandise.date_added=None
+            new_merchandise_session.close()
+            continue
+
+#Display data from the game database
+def display_game_database(session_query):
+    for game in session_query.query(Game):
+        print('Venue id: {} Stadium: {} Game locatin: {} Game date: {} Date entered: {}'.format(game.venue_id, game.stadium,
+        game.game_location, game.game_date, game.date_updated.strftime("%a, %b, %Y %I:%M%p")))
 
 #A method the use to add venue_id, item_id and quantity for merchandise and game table
 def add_sale_info(sale_session):
     while True:
         try:
-
             new_venue_id = get_integer("Please enter the venue id for game table: ")
             new_item_id = get_integer("Please enter the item id from the merchandise talbe:  ")
             total_quanity_amount = get_integer("Please enter the quantity that was sold from the sales table: ")
@@ -128,13 +155,14 @@ def add_sale_info(sale_session):
             sale_session.add(sale_info)
             sale_session.commit()
             print("Sales id: {} Venue id: {} Item id: {} Total Quanity: {}".format(sale_info.id, sale_info.venue_id,
-            sale_info.item_id, sale_info.total_quanity_amount, sale_info.date_enter))
+            sale_info.item_id, sale_info.quantity_sold, sale_info.date_enter))
             print("Successfully added to the database")
-            session.close()
+            sale_session.close()
             break
-        except:
-            print("Error saving data to the databases")
-            sale_session.rollback() # Roll back to previous point in time since there was an error in saving the user data
+        except  Exception:
+            print(e)
+            print("Error saving data to the databases. Please make sure you enter the right venue id and sales id ")
+            sale_session.rollback() # Roll back to previous point in time. Set all fields to NO since there was an error in saving the user data
             sale_info.id=None
             sale_info.venue_id=None
             sale_info.item_id=None
@@ -142,21 +170,132 @@ def add_sale_info(sale_session):
             sale_info.total_quanity_amount=None
             continue
 
+#Displays all items in the Merchandise table
+def display_merchandise_data(session_query):
+    for item in session_query.query(Merchandise):
+        print('Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(item.id, item.item_name,
+         item.item_price, item.total_quantity, item.date_added.strftime("%a, %b, %Y %I:%M%p")))
+
+def update_tables_info():
+    print("Enter 1 to update items in the Merchandise table")
+    print("Enter 2 to update information in the Game table")
+    print("Enter 3 to update quantity amount in the Sales table ")
+
+
+#Display the menu options for the user
+def display_menus_options():
+    print("Welcome to Team tour database")
+    print("Menu options")
+    print("Enter 1 to add new information to the Game table")
+    print("Enter 2 to add new information to the Merchandise table")
+    print("Enter 3 to add new information to Sales table")
+    print("Enter 4 to update an information in either the Sales , Merchandise or Sales table")
+    print("Enter 5 search search which game had the highest salses")
+    print("Enter q to exit the database")
+
+def update_merchandise_item():
+    available_session = Session()
+    while True:
+        try:
+
+            print("Items currently store in the merchandise table")
+            display_merchandise_data(available_session)
+            enter_choice = get_integer("Please enter venue id you would want to update: ")
+            update_item = available_session.query(Merchandise).filter_by(id=enter_choice).one()
+            print('Item to be updated: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(update_item.id, update_item.item_name,
+            update_item.item_price, update_item.total_quantity, update_item.date_added.strftime("%a, %b, %Y %I:%M%p")))
+            response = get_valid_user_input("Do you want to change {} Y/N? ".format(update_item.item_name)).lower()
+            if response == "y":
+                new_item = get_valid_user_input("Please enter item new name for {}: ".format(update_item.item_name))
+                update_item.item_name = new_item
+            elif response =='n':
+                pass
+            response = get_valid_user_input("Do you want to change the price of {} Y/N? ".format(update_item.item_price)).lower()
+            if response == 'y':
+                new_price= get_price("Please enter new price for old price of {}: ".format(update_item.item_price))
+                update_item.item_price = new_price
+            elif response =='n':
+                pass
+            response = get_valid_user_input("Do you want to change the current quantity of {} Y/N? ".format(update_item.total_quantity)).lower()
+            if response == 'y':
+                new_quantity = get_integer("Please enter new price for old price of {}: ".format(update_item.total_quantity))
+                update_item.total_quantity = new_quantity
+            elif response == 'n':
+                pass
+            available_session.commit()
+            print('Successfully updated to: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(update_item.id, update_item.item_name,
+            update_item.item_price, update_item.total_quantity, update_item.date_added.strftime("%a, %b, %Y %I:%M%p")))
+            available_session.close()
+            break
+        except Exception as e:
+            print("Error modifying data. Coudln't save data to the database")
+            print(e)
+            available_session.rollback()
+
+
+
+#The main method that controls user interaction with our database
+def main():
+    while True:
+        display_menus_options()
+        choice = get_integer("Please enter a choice from the menu: ")
+        #if choice is 1, ask the user if they actually wants to add information to the game table. If user_choice is y display the game table and ask the user for inputs
+        if choice == 1:
+            user_choice = get_valid_user_input("Are you sure you want to enter data in the Game table? Please enter Y/N? ").lower()
+            if user_choice =='y':
+                print("information currently available in the game table")
+                display_game_database(session)
+                add_new_game_location_info(session)
+            else:
+                continue
+        #if choice is 2, ask the user if they actually wants to add information to the merchandise table. If user_choice is y display the merchandise database and ask the user for inputs
+        elif choice == 2:
+            user_choice = get_valid_user_input("Are you sure you want to enter data in the Merchandis table? Please enter Y/N? ").lower()
+            if user_choice == 'y':
+                print("Items currently store in the in merchandise table: ")
+                display_merchandise_data(session)
+                add_new_merchandise_item(session)
+            else:
+                continue
+            #if choice is 3, ask the user if they actually wants to add information to the Sales table. If user_choice is y display the game and merchandise table and ask the user for inputs
+        elif choice == 3:
+            user_choice = get_valid_user_input("Are you sure you want to enter data in the Sales table? Please enter Y/N? ").lower()
+            if user_choice == 'y':
+                print("Current game schedule store in the database")
+                display_game_database(session)
+                print("Current merchandise store in the database")
+                display_game_database(session)
+                add_sale_info(session)
+            else:
+                continue
+        elif choice == 4:
+            user_choice = get_valid_user_input("Are you sure you want to update information in the database Y/N? ").lower()
+            if user_choice == 'y':
+                update_tables_info()
+                choice_made = get_integer("Please enter menu choice: ")
+                if choice_made ==1:
+                    print("Current information store in the merchandise table")
+                    display_merchandise_data(session)
+                    update_merchandise_item()
 
 
 
 
-
-
-game_one = Game(stadium='Vikings Stadium', game_location="Minneapolis",game_date='2017-11-04')
-game_two= Game(stadium="Ohio Stadium", game_location="Columbus", game_date='2017-15-05')
-game_three= Game(stadium='Bryant–Denny Stadium', game_location='Tuscaloosa', game_date='2017-22-14')
-game_four = Game(stadium='Cotton Bowl', game_location='Dallas', game_date='2017-12-13')
-
-
-for game in session.query(Game):
-    print(game)
-add_sale_info(session)
-# add_new_merchandise_item(session)
-# add_new_game_location_info(session)
-# merchand = Merchandise(item_decription='Hat', item_price=4.50)
+# game_one = Game(stadium='Vikings Stadium', game_location="Minneapolis",game_date='2017-11-04')
+# game_two= Game(stadium="Ohio Stadium", game_location="Columbus", game_date='2017-15-05')
+# game_three= Game(stadium='Bryant–Denny Stadium', game_location='Tuscaloosa', game_date='2017-22-14')
+# game_four = Game(stadium='Cotton Bowl', game_location='Dallas', game_date='2017-12-13')
+#
+# #
+# display_game_database(session)
+# display_merchandise_data(session)
+# # # # for game in session.query(Game):
+# # # #     print(game)
+# #
+# # # add_new_merchandise_item(session)
+# # # add_new_game_location_info(session)
+# add_sale_info(session)
+# # # merchand = Merchandise(item_decription='Hat', item_price=4.50)
+#
+if __name__=='__main__':
+    main()

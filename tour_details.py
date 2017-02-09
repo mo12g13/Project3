@@ -24,8 +24,8 @@ class Game(Base):
     venue_id = Column(Integer(), primary_key=True)
     stadium = Column(String(50), nullable=False)
     game_location =Column(String(50), nullable=False)
-    game_date = Column(String(50), default=datetime.now().strftime("%d/%m/%y"))
-    date_updated = Column(DATETIME(), default=datetime.now)
+    game_date = Column(String(50), default=datetime.now().time().isoformat())
+    date_updated = Column(DATETIME(), default=datetime.now().time())
 
     def __str__(self):
         game_record='Game details: venue_id={} stadium={} game_location={} game_date={} date_updated={}'
@@ -39,7 +39,7 @@ class Merchandise(Base):
     item_name = Column(String(100), nullable=False)
     item_price = Column(Numeric(10, 2), nullable=False)
     total_quantity = Column(Integer(), nullable= False)
-    date_added = Column(DATE(), default=datetime.now)
+    date_added = Column(DATE(), default=datetime.now().time().isoformat())
 
     # sale = relationship('Sales',back_populates='merchandise_item')
     def __str_(self):
@@ -53,13 +53,14 @@ class Sales(Base):
     venue_id = Column(Integer(), ForeignKey('game_schedule.venue_id'))
     item_id = Column(Integer(), ForeignKey('merchandise.id'))
     quantity_sold = Column(Integer(), nullable=False)
-    date_enter = Column(DATE(), default=datetime.now)
+    date_enter = Column(DATE(), default=datetime.now().time().isoformat())
 
-    #Establishing of various tables relationship. Sales table referencing game and merchandise tables
+    #Establishing of various tables relationship. Sales table referencing game and merchandise table
     game = relationship('Game', backref=backref('sale', order_by=id))
     merchandise = relationship('Merchandise', backref=backref('sale', order_by=id))
 
     def __str__(self):
-        sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} date_enter={}"
-        return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold, self.date_enter)
-    Base.metadata.create_all(engine)
+        sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} "
+        return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold)
+
+Base.metadata.create_all(engine)
