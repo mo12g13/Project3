@@ -26,13 +26,15 @@ def get_valid_date(display_message):
 
                 break
             else:
-                print("Please a date in the following format YYYY-MM-DD/YYYY/MM/DD")
+                print("Please enter date in the following format YYYY-MM-DD/YYYY/MM/DD. Year should only be in 2017")
                 continue
         except ValueError:
             print("Please enter a valid date. The year, month or day was higher than expected")
             continue
+
     new_date.timetuple()
-    return new_date
+    
+    return new_date.isoformat()
 
 #A method that validates the user input to make user the user enters a valid input
 def get_valid_user_input(display_message):
@@ -89,8 +91,8 @@ def add_new_game_location_info(new_session):
         try:
             stadium_name = get_valid_user_input("Please enter the name for this stadium: ")
             new_location = get_valid_user_input("Please enter the city where {} stadium is located: ".format(stadium_name))
-            game_schedule_date= get_valid_date('Please enter the schedule date for {} game. We only accept within 2017: '.format(new_location))
-            new_game = Game(stadium=stadium_name, game_location=new_location, game_date=str(game_schedule_date))
+            game_schedule_date= get_valid_date('Please enter the schedule date for {} game. Valid year should be 2017: '.format(new_location))
+            new_game = Game(stadium=stadium_name, game_location=new_location, game_date=game_schedule_date)
             new_session.add(new_game)
             new_session.commit()
 
