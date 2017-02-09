@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from tour_details import Game, Merchandise, Sales
 import datetime
+from sqlalchemy.sql import func
 
 
 #Connection of sqlite database for this project
@@ -183,11 +184,12 @@ def display_merchandise_data(session_query):
         print("Couldn't read data from database. Database connection error")
         print(e)
 
+#A method that display the update menu for each table
 def update_tables_info():
     print("Enter 1 to update items in the Merchandise table")
     print("Enter 2 to update information in the Game table")
     print("Enter 3 to update quantity amount in the Sales table ")
-
+# A menu that dipslays the delete menu for each table
 def delete_table_data():
     print("Enter 1 to delete a row in the Game table")
     print("Enter 2 to delete a row in the Merchandise table")
@@ -255,7 +257,7 @@ def update_merchandise_item():
             print(e)
             available_session.rollback()
             continue
-
+# A method taht is called to update the game table
 def update_game_table():
     available_session = Session()
     while True:
@@ -306,6 +308,7 @@ def update_game_table():
             available_session.rollback()
             continue
 
+# A method that is called to update the sales table
 def update_sales_table():
 
         new_session_to_update = Session()
@@ -424,9 +427,21 @@ def display_sale_table(session_query):
         print(e)
         print("Connection error" "database connection wasn't successful")
         session_query.close()
+#A method that finds the max quantity venue_id, item_id that had the highest sales
+def find_max_quantity_amount():
+    try:
+        print("Venue with the hight sales quantity")
+        max_session = Session()
+        query = max_session.query(Sales).order_by(Sales.quantity_sold.desc()).first()
+        print('Sales id: {}  Venue id: {} Iem id: {} Quantity sold: {} Date entered: {}'.format(query.id, query.venue_id,
+        query.item_id, query.quantity_sold, query.date_enter.isoformat()))
+        max_session.close()
+    except Exception as e:
+        print("Error has occured. Couldn't restrieve the max quantity sold from the database")
+        print(e)
+        max_session.rollback()
+        max_session.close()
 
-
-#The main method that controls user interaction with our database
 def main():
     while True:
         display_menus_options()
@@ -493,6 +508,8 @@ def main():
                 elif user_choice == 3:
                     display_sale_table(session)
                     delete_sales_table_row()
+        elif choice == 6:
+            find_max_quantity_amount()
         elif choice == 7:
             print("Shutting the database....")
             session.close()
