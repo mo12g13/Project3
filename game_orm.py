@@ -41,9 +41,6 @@ def get_valid_user_input(display_message):
         if user_input =='':
             print('Please enter a valid text, No empty is allowed')
             continue
-        elif user_input[0].isdigit():
-            print("Please enter a valid name. Name shouldn't start with number/numbers")
-            continue
         else:
             break
     return user_input
@@ -60,7 +57,7 @@ def get_integer(display_message):
                 print('Please  enter a value greater than zero')
                 continue
         except ValueError:
-            print("Please avoid entering characters. you were asked to enter quantity amount")
+            print("Please avoid entering characters. Please enter a valid number")
             continue
         return user_input_enter
 
@@ -140,9 +137,13 @@ def add_new_merchandise_item(new_merchandise_session):
 
 #Display data from the game database
 def display_game_database(session_query):
-    for game in session_query.query(Game):
-        print('Venue id: {} Stadium: {} Game locatin: {} Game date: {} Date entered: {}'.format(game.venue_id, game.stadium,
-        game.game_location, game.game_date, game.date_updated.strftime("%a, %b, %Y %I:%M%p")))
+    try:
+        for game in session_query.query(Game):
+            print('Venue id: {} Stadium: {} Game locatin: {} Game date: {} Date entered: {}'.format(game.venue_id, game.stadium,
+            game.game_location, game.game_date, game.date_updated.isoformat()))
+    except Exception as e:
+        print(e)
+        print("Error connecting to the database. Connection wasn't successful")
 
 #A method the use to add venue_id, item_id and quantity for merchandise and game table
 def add_sale_info(sale_session):
@@ -157,9 +158,10 @@ def add_sale_info(sale_session):
             print("Sales id: {} Venue id: {} Item id: {} Total Quanity: {}".format(sale_info.id, sale_info.venue_id,
             sale_info.item_id, sale_info.quantity_sold, sale_info.date_enter))
             print("Successfully added to the database")
+
             sale_session.close()
             break
-        except  Exception:
+        except  Exception as e:
             print(e)
             print("Error saving data to the databases. Please make sure you enter the right venue id and sales id ")
             sale_session.rollback() # Roll back to previous point in time. Set all fields to NO since there was an error in saving the user data
@@ -172,14 +174,24 @@ def add_sale_info(sale_session):
 
 #Displays all items in the Merchandise table
 def display_merchandise_data(session_query):
-    for item in session_query.query(Merchandise):
-        print('Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(item.id, item.item_name,
-         item.item_price, item.total_quantity, item.date_added.strftime("%a, %b, %Y %I:%M%p")))
+    try:
+        for item in session_query.query(Merchandise):
+            print('Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(item.id, item.item_name,
+             item.item_price, item.total_quantity, item.date_added.isoformat()))
+        session_query.close()
+    except Exception as e:
+        print("Couldn't read data from database. Database connection error")
+        print(e)
 
 def update_tables_info():
     print("Enter 1 to update items in the Merchandise table")
     print("Enter 2 to update information in the Game table")
     print("Enter 3 to update quantity amount in the Sales table ")
+
+def delete_table_data():
+    print("Enter 1 to delete a row in the Game table")
+    print("Enter 2 to delete a row in the Merchandise table")
+    print("Enter 3 to delte a row from Sales table ")
 
 
 #Display the menu options for the user
@@ -190,8 +202,9 @@ def display_menus_options():
     print("Enter 2 to add new information to the Merchandise table")
     print("Enter 3 to add new information to Sales table")
     print("Enter 4 to update an information in either the Sales , Merchandise or Sales table")
-    print("Enter 5 search search which game had the highest salses")
-    print("Enter q to exit the database")
+    print("Enter 5 to delete a row from either the Sales Merchandise or Game table")
+    print("Enter 6 search search which game had the highest salses")
+    print("Enter 7 to exit the database")
 
 #A method that is used to update the merchandise table
 def update_merchandise_item():
@@ -200,31 +213,41 @@ def update_merchandise_item():
         try:
             print("Items currently store in the merchandise table")
             display_merchandise_data(available_session)
-            enter_choice = get_integer("Please enter venue id you would want to update: ")
+            enter_choice = get_integer("Please enter item id you would want to update: ")
             update_item = available_session.query(Merchandise).filter_by(id=enter_choice).one()
             print('Item to be updated: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(update_item.id, update_item.item_name,
-            update_item.item_price, update_item.total_quantity, update_item.date_added.strftime("%a, %b, %Y %I:%M%p")))
+            update_item.item_price, update_item.total_quantity, update_item.date_added.isoformat()))
             response = get_valid_user_input("Do you want to change {} Y/N? ".format(update_item.item_name)).lower()
             if response == "y":
                 new_item = get_valid_user_input("Please enter item new name for {}: ".format(update_item.item_name))
                 update_item.item_name = new_item
             elif response =='n':
                 pass
+            else:
+                print("Entry not valid please enter a valid entry")
+                continue
             response = get_valid_user_input("Do you want to change the price of {} Y/N? ".format(update_item.item_price)).lower()
             if response == 'y':
                 new_price= get_price("Please enter new price for old price of {}: ".format(update_item.item_price))
                 update_item.item_price = new_price
             elif response =='n':
                 pass
+
+            else:
+                print("Entry not valid please enter a valid entry")
+                continue
             response = get_valid_user_input("Do you want to change the current quantity of {} Y/N? ".format(update_item.total_quantity)).lower()
             if response == 'y':
                 new_quantity = get_integer("Please enter new price for old price of {}: ".format(update_item.total_quantity))
                 update_item.total_quantity = new_quantity
             elif response == 'n':
                 pass
+            else:
+                print("Entry not valid please enter a valid entry")
+                continue
             available_session.commit()
             print('Successfully updated to: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(update_item.id, update_item.item_name,
-            update_item.item_price, update_item.total_quantity, update_item.date_added.strftime("%a, %b, %Y %I:%M%p")))
+            update_item.item_price, update_item.total_quantity, update_item.date_added.isoformat()))
             available_session.close()
             break
         except Exception as e:
@@ -234,7 +257,173 @@ def update_merchandise_item():
             continue
 
 def update_game_table():
-    pass
+    available_session = Session()
+    while True:
+        try:
+            print("Items currently store in the Game table")
+            display_game_database(available_session)
+            enter_choice = get_integer("Please enter venue id you would want to update: ")
+            update_item = available_session.query(Game).filter_by(venue_id=enter_choice).one()
+            print('Item to be updated: Venue id: {} Stadium name: {} Game location: {} Game date: {} Date added: {}'.format(update_item.venue_id, update_item.stadium,
+            update_item.game_location, update_item.game_date, update_item.date_updated.isoformat()))
+            response = get_valid_user_input("Do you want to change {} Y/N? ".format(update_item.stadium)).lower()
+            if response == "y":
+                new_stadium = get_valid_user_input("Please enter item new name for {}: ".format(update_item.stadium))
+                update_item.stadium = new_stadium
+            elif response =='n':
+                pass
+
+            else:
+                print("Entry not valid please enter a valid entry")
+                continue
+            response = get_valid_user_input("Do you want to change the game location for {} Y/N? ".format(update_item.game_location)).lower()
+            if response == 'y':
+                new_location= get_valid_user_input("Please enter new game location  {} game: ".format(update_item.game_location))
+                update_item.game_location = new_location
+            elif response =='n':
+                pass
+            else:
+                print("Entry not valid please enter a valid entry")
+                continue
+            response = get_valid_user_input("Do you want want to change the game date of  {}Y/N? ".format(update_item.game_date)).lower()
+            if response == 'y':
+                new_date = get_valid_date("Please enter new date to replace {} date Date format: YYYY/MM/DD or YYYY-MM-DD for 2017 only: ".format(update_item.game_date))
+                update_item.game_date = new_date
+            elif response == 'n':
+                pass
+            else:
+                print("Entry not valid please enter a valid entry")
+                continue
+            date_updated = datetime.datetime.now()
+            available_session.commit()
+            print('Successfully updated to: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(update_item.venue_id, update_item.stadium,
+            update_item.game_location, update_item.game_date, update_item.date_updated.isoformat()))
+            available_session.close()
+            break
+        except Exception as e:
+            print("Error modifying data. Coudln't save data to the database")
+            print(e)
+            available_session.rollback()
+            continue
+
+def update_sales_table():
+
+        new_session_to_update = Session()
+        while True:
+            try:
+                print("Items currently store in the Game table")
+
+                enter_choice = get_integer("Please enter sale id you would want to update: ")
+                update_item = new_session_to_update.query(Sales).filter_by(id=enter_choice).one()
+                print('Item to be updated: Sale id: {} Venue id: {} Item id: {} Quantity sold: {} Date added: {}'.format(update_item.id, update_item.venue_id,
+                update_item.item_id, update_item.quantity_sold, update_item.date_enter.isoformat()))
+                response = get_valid_user_input("Do you want to change venue id {} Y/N? ".format(update_item.venue_id)).lower()
+                if response == "y":
+                    venue_new_id = get_valid_user_input("Please new venue id for venue id {}: ".format(update_item.venue_id))
+                    update_item.venue_id = venue_new_id
+                elif response =='n':
+                    pass
+                else:
+                    print("Entry not valid please enter a valid entry")
+                    continue
+                response = get_valid_user_input("Do you want to change item id {} Y/N? ".format(update_item.item_id)).lower()
+                if response == 'y':
+                    new_id_item= get_valid_user_input("Please enter new item id for item id {}: ".format(update_item.item_id))
+                    update_item.item_id = new_id_item
+                elif response =='n':
+                    pass
+                else:
+                    print("Entry not valid please enter a valid entry")
+                    continue
+                response = get_valid_user_input("Do you want to change the quanty of {}Y/N? ".format(update_item.quantity_sold)).lower()
+                if response == 'y':
+                    new_quantity= get_integer("Please enter new quantity amount for {}: ".format(update_item.quantity_sold))
+                    update_item.quantity_sold = new_quantity
+                elif response == 'n':
+                    pass
+                else:
+                    print("Entry not valid please enter a valid entry")
+                    continue
+                date_enter= datetime.datetime.now()
+                new_session_to_update.commit()
+                print('Successfully updated to: Sale id: {} Venu id: {}  Item id: {} Quantity {} Date added: {}'.format(update_item.id, update_item.venue_id,
+                update_item.item_id, update_item.quantity_sold, update_item.date_enter.isoformat()))
+                new_session_to_update.close()
+                break
+            except Exception as e:
+                print("Error modifying data. Coudln't save data to the database")
+                print(e)
+                new_session_to_updaten.rollback()
+                continue
+# A method that deletes row in the Game table
+def delete_game_table_row():
+    game_delete_session = Session()
+    while True:
+        try:
+            user_input = get_integer("Please enter the game id of the row you want to delete: ")
+            for delete_row in game_delete_session.query(Game).filter_by(venue_id=user_input):
+                game_delete_session.delete(delete_row)
+            print('Row successfully deleted: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(delete_row.venue_id, delete_row.stadium,
+            delete_row.game_location, delete_row.game_date, delete_row.date_updated.isoformat()))
+            game_delete_session.commit()
+            game_delete_session.close()
+            break
+        except Exception as e:
+            print(e)
+            print("Error deleting data from the database")
+            delete_session.rollback()
+            delete_session.close()
+            continue
+# A method that deletes row in the Merchandise table
+def dele_merchandise_table_row():
+    merchandise_delete_session = Session()
+    while True:
+        try:
+            user_input = get_integer("Please enter the item id of the row you want to delete: ")
+            for delete_row in merchandise_delete_session.query(Merchandise).filter_by(id=user_input):
+                merchandise_delete_session.delete(delete_row)
+            print('Row successfully deleted: Item id: {} Item name: {} Price: {} Quanty: {} Date added: {}'.format(delete_row.id, delete_row.item_name,
+            delete_row.item_price, delete_row.total_quantity, delete_row.date_added.isoformat()))
+            merchandise_delete_session.commit()
+            merchandise_delete_session.close()
+            break
+        except Exception as e:
+            print(e)
+            print("Error deleting data from the database")
+            merchandise_delete_session.rollback()
+            merchandise_delete_session.close()
+            continue
+# A method that deletes a row in the sales table
+def delete_sales_table_row():
+    sales_delete_session = Session()
+    while True:
+        try:
+            user_input = get_integer("Please enter the Sales id of the row you want to delete: ")
+            for delete_row in sales_delete_session.query(Sales).filter_by(id=user_input):
+                sales_delete_session.delete(delete_row)
+            print('Sales id: {}  Venue id: {} Iem id: {} Quantity sold: {} Date entered: {}'.format(delete_row.id, delete_row.venue_id,
+            delete_row.item_id, delete_row.quantity_sold, delete_row.date_enter.isoformat()))
+            sales_delete_session.commit()
+            sales_delete_session.close()
+            break
+        except Exception as e:
+            print(e)
+            print("Error deleting data from the database")
+            sales_delete_session.rollback()
+            sales_delete_session.close()
+            continue
+
+# Display data from the sales table
+def display_sale_table(session_query):
+    try:
+        for sales in session_query.query(Sales):
+            print('Sales id: {}  Venue id: {} Iem id: {} Quantity sold: {} Date entered: {}'.format(sales.id, sales.venue_id,
+            sales.item_id, sales.quantity_sold, sales.date_enter.isoformat()))
+        session_query.close()
+    except Exception as e:
+        print(e)
+        print("Connection error" "database connection wasn't successful")
+        session_query.close()
 
 
 #The main method that controls user interaction with our database
@@ -266,12 +455,16 @@ def main():
             if user_choice == 'y':
                 print("Current game schedule store in the database")
                 display_game_database(session)
+                print('\n')
                 print("Current merchandise store in the database")
-                display_game_database(session)
+                print('\n')
+                display_merchandise_data(session)
+                print("current sales information in our database")
+                display_sale_table(session)
                 add_sale_info(session)
             else:
                 continue
-        elif choice == 4:
+        elif choice == 4: #Choice to update information within this database
             user_choice = get_valid_user_input("Are you sure you want to update information in the database Y/N? ").lower()
             if user_choice == 'y':
                 update_tables_info()
@@ -280,25 +473,37 @@ def main():
                     print("Current information store in the merchandise table")
                     display_merchandise_data(session)
                     update_merchandise_item()
+                elif choice_made== 2:
+                    display_game_database(session)
+                    update_game_table()
+                elif choice_made == 3:
+                    display_sale_table(session)
+                    update_sales_table()
+        elif choice == 5: # If choice is equals 5 as confirm if user what wants delete information from the database and display the appropriate menu
+            valid_choice = get_valid_user_input("Are you sure you want to delete information in the database Y/N? ").lower()
+            if valid_choice =='y':
+                delete_table_data()
+                user_choice = get_integer("Please enter menu choice")
+                if user_choice == 1:
+                    display_game_database(session)
+                    delete_game_table_row()
+                elif user_choice == 2:
+                    display_merchandise_data(session)
+                    dele_merchandise_table_row()
+                elif user_choice == 3:
+                    display_sale_table(session)
+                    delete_sales_table_row()
+        elif choice == 7:
+            print("Shutting the database....")
+            session.close()
+            session.commit()
+            break
+
+            break
 
 
 
 
-# game_one = Game(stadium='Vikings Stadium', game_location="Minneapolis",game_date='2017-11-04')
-# game_two= Game(stadium="Ohio Stadium", game_location="Columbus", game_date='2017-15-05')
-# game_three= Game(stadium='Bryant–Denny Stadium', game_location='Tuscaloosa', game_date='2017-22-14')
-# game_four = Game(stadium='Cotton Bowl', game_location='Dallas', game_date='2017-12-13')
-#
-# #
-# display_game_database(session)
-# display_merchandise_data(session)
-# # # # for game in session.query(Game):
-# # # #     print(game)
-# #
-# # # add_new_merchandise_item(session)
-# # # add_new_game_location_info(session)
-# add_sale_info(session)
-# # # merchand = Merchandise(item_decription='Hat', item_price=4.50)
-#
+
 if __name__=='__main__':
     main()
