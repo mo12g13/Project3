@@ -193,11 +193,11 @@ def display_menus_options():
     print("Enter 5 search search which game had the highest salses")
     print("Enter q to exit the database")
 
+#A method that is used to update the merchandise table
 def update_merchandise_item():
     available_session = Session()
     while True:
         try:
-
             print("Items currently store in the merchandise table")
             display_merchandise_data(available_session)
             enter_choice = get_integer("Please enter venue id you would want to update: ")
@@ -231,7 +231,10 @@ def update_merchandise_item():
             print("Error modifying data. Coudln't save data to the database")
             print(e)
             available_session.rollback()
+            continue
 
+def update_game_table():
+    pass
 
 
 #The main method that controls user interaction with our database

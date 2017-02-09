@@ -60,7 +60,12 @@ class Sales(Base):
     merchandise = relationship('Merchandise', backref=backref('sale', order_by=id))
 
     def __str__(self):
+
         sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} "
         return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold)
+
+        sales_record = "Sale Details: id={}  venue_id={} quantity_sold={} date_enter={}"
+        return sales_record.format(self.id,self.venue_id, self.item_id, self.quantity_sold, self.date_enter)
+
 
 Base.metadata.create_all(engine)
