@@ -39,7 +39,7 @@ class Merchandise(Base):
     item_name = Column(String(100), nullable=False)
     item_price = Column(Numeric(10, 2), nullable=False)
     total_quantity = Column(Integer(), nullable= False)
-    date_added = Column(DATE(), default=datetime.now().time().isoformat())
+    date_added = Column(DATE(), default=datetime.now)
 
     # sale = relationship('Sales',back_populates='merchandise_item')
     def __str_(self):
@@ -53,7 +53,7 @@ class Sales(Base):
     venue_id = Column(Integer(), ForeignKey('game_schedule.venue_id'))
     item_id = Column(Integer(), ForeignKey('merchandise.id'))
     quantity_sold = Column(Integer(), nullable=False)
-    date_enter = Column(DATE(), default=datetime.now().time().isoformat())
+    date_enter = Column(DATE(), default=datetime.now())
 
     #Establishing of various tables relationship. Sales table referencing game and merchandise table
     game = relationship('Game', backref=backref('sale', order_by=id))

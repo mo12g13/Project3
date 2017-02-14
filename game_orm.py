@@ -118,11 +118,11 @@ def add_new_merchandise_item(new_merchandise_session):
         try:
             new_item_name =get_valid_user_input("Please enter the name of this item: ")
             new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
-            quantities=get_integer('Please enter the quantity amount for {}'.format(new_item_name))
+            quantities = get_integer('Please enter the quantity amount for {}'.format(new_item_name))
             new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
             new_merchandise_session.add(new_merchandise)
             new_merchandise_session.commit()
-            print('Item id: {} Price: {} Quanty: {} Date added: {}'.format(new_merchandise.item_name,
+            print('Item id: {} Itme name: {} Price: {} Quantity: {} Date added: {}'.format(new_merchandise.id, new_merchandise.item_name,
              new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
             print("Successfully added to database")
             new_merchandise_session.close()
