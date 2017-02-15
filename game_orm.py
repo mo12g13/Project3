@@ -33,7 +33,7 @@ def get_valid_date(display_message):
             continue
 
     new_date.timetuple()
-    
+
     return new_date.isoformat()
 
 #A method that validates the user input to make user the user enters a valid input
@@ -113,35 +113,26 @@ def add_new_game_location_info(new_session):
             continue
 
 #A method that adds items to the merchandise table
-def add_new_merchandise_item(new_merchandise_session):
-    while True:
-        try:
-            new_item_name =get_valid_user_input("Please enter the name of this item: ")
-            new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
-            quantities = get_integer('Please enter the quantity amount for {}'.format(new_item_name))
-            new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
-            new_merchandise_session.add(new_merchandise)
-            new_merchandise_session.commit()
-            print('Item id: {} Itme name: {} Price: {} Quantity: {} Date added: {}'.format(new_merchandise.id, new_merchandise.item_name,
-             new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
-            print("Successfully added to database")
-            new_merchandise_session.close()
-            break
-        except:
-            print("Error saving data to the database")
-            new_merchandise_session.rollback() #rollback to previous time. Set all fields to None since there was an error in saving the data
-            new_merchandise_session.id=None
-            new_merchandise_session.item_name=None
-            new_merchandise.item_price=None
-            new_merchandise_session.total_quantity=None
-            new_merchandise.date_added=None
-            new_merchandise_session.close()
-            continue
+def add_new_merchandise_item(new_item_name, new_item_price, quantities):
+    try:
+        new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
+        session.add(new_merchandise)
+        session.commit()
+        print('Item id: {} Itme name: {} Price: {} Quantity: {} Date added: {}'.format(new_merchandise.id, new_merchandise.item_name,
+         new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
+        print("Successfully added to database")
+        session.close()
+
+    except Exception as e:
+        print("Error saving data to the database", e)
+        new_merchandise_session.rollback() #rollback to previous time. Set all fields to None since there was an error in saving the data
+        session.close()
+
 
 #Display data from the game database
-def display_game_database(session_query):
+def display_game_database():
     try:
-        for game in session_query.query(Game):
+        for game in session.query(Game):
             print('Venue id: {} Stadium: {} Game locatin: {} Game date: {} Date entered: {}'.format(game.venue_id, game.stadium,
             game.game_location, game.game_date, game.date_updated.isoformat()))
     except Exception as e:
@@ -435,8 +426,7 @@ def find_max_quantity_amount():
         print("Venue with the hight sales quantity")
         max_session = Session()
         query = max_session.query(Sales).order_by(Sales.quantity_sold.desc()).first()
-        print('Sales id: {}  Venue id: {} Iem id: {} Quantity sold: {} Date entered: {}'.format(query.id, query.venue_id,
-        query.item_id, query.quantity_sold, query.date_enter.isoformat()))
+        print('Sales id: {}  Venue id: {} Iem id: {} Quantity sold: {} Date entered: {}'.format(query.id, query.venue_id, query.item_id, query.quantity_sold, query.date_enter.isoformat()))
         max_session.close()
     except Exception as e:
         print("Error has occured. Couldn't restrieve the max quantity sold from the database")
@@ -463,7 +453,11 @@ def main():
             if user_choice == 'y':
                 print("Items currently store in the in merchandise table: ")
                 display_merchandise_data(session)
-                add_new_merchandise_item(session)
+                new_item_name =get_valid_user_input("Please enter the name of this item: ")
+                new_item_price = get_price('Please enter the price for {}: '.format(new_item_name))
+                quantities = get_integer('Please enter the quantity amount for {}'.format(new_item_name))
+
+                add_new_merchandise_item(new_item_name, new_item_price, quantities)
             else:
                 continue
             #if choice is 3, ask the user if they actually wants to add information to the Sales table. If user_choice is y display the game and merchandise table and ask the user for inputs
