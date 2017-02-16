@@ -107,42 +107,40 @@ def user_enter_price(message_display):
 # For instance, if we have a new game information, the user can add that game information
 
 def add_new_game_location_info(stadium_name, new_location, game_schedule_date):
-    while True:
-        try:
-            new_game = Game(stadium=stadium_name, game_location=new_location, game_date=game_schedule_date)
-            session.add(new_game)
-            session.commit()
-            print('Venue id:{} Stadium: {} Game location: {} Game date: {} Date added {}'.format(new_game.venue_id, new_game.stadium, new_game.game_location,new_game.game_date,new_game.date_updated))
-            print("Successfully added to the database")
-            session.close()
-            break
-        except Exception as e:
-            print(e)
-            session.rollback() # rollback the database since there and error in saving the data
 
-            session.close()
-            continue
+    try:
+        new_game = Game(stadium=stadium_name, game_location=new_location, game_date=game_schedule_date)
+        session.add(new_game)
+        session.commit()
+        print('Venue id:{} Stadium: {} Game location: {} Game date: {} Date added {}'.format(new_game.venue_id, new_game.stadium, new_game.game_location,new_game.game_date,new_game.date_updated))
+        print("Successfully added to the database")
+        session.close()
+
+    except Exception as e:
+        print(e)
+        session.rollback() # rollback the database since there and error in saving the data
+
+        session.close()
+
 
 # A method that adds items to the merchandise table
 
 
 def add_new_merchandise_item(new_item_name, new_item_price, quantities):
-    while True:
-        try:
-            new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
-            session.add(new_merchandise)
-            session.commit()
-            print('Item id: {} Item name: {} Price: {} Quantity: '\
-             '{} Date added: {}'.format(new_merchandise.id, new_merchandise.item_name, new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
-            print("Successfully added to database")
-            session.close()
-            break
-        except Exception as e:
-            print(e)
-            print("Error saving data to the database")
-            session.rollback() # Rollback to previous time. Set all fields to None since there was an error in saving the data
-            session.close()
-            continue
+    try:
+        new_merchandise = Merchandise(item_name=new_item_name, item_price=new_item_price, total_quantity=quantities)
+        session.add(new_merchandise)
+        session.commit()
+        print('Item id: {} Item name: {} Price: {} Quantity: '\
+         '{} Date added: {}'.format(new_merchandise.id, new_merchandise.item_name, new_merchandise.item_price, new_merchandise.total_quantity, new_merchandise.date_added))
+        print("Successfully added to database")
+        session.close()
+    except Exception as e:
+        print(e)
+        print("Error saving data to the database")
+        session.rollback() # Rollback to previous time. Set all fields to None since there was an error in saving the data
+        session.close()
+
 
 # Display data from the game database
 
@@ -161,23 +159,23 @@ def display_game_database():
 
 # A method the use to add venue_id, item_id and quantity for merchandise and game table
 def add_sale_info(new_venue_id, new_item_id, total_quantity_amount):
-    while True:
-        try:
-            sale_info = Sales(venue_id=new_venue_id, item_id=new_item_id, quantity_sold=total_quantity_amount)
-            session.add(sale_info)
-            session.commit()
-            print('Sales id: {} Venue id: {} Item id:'\
-             '{} Total Quantity: {}'.format(sale_info.id, sale_info.venue_id,
-                                           sale_info.item_id, sale_info.quantity_sold, sale_info.date_enter))
-            print("Successfully added to the database")
-            session.close()
-            break
-        except Exception as e:
-            print(e)
-            print("Error saving data to the databases. Please make sure you enter the right venue id and sales id ")
-            session.rollback() # Rollback the database
-            session.close()
-            continue
+
+    try:
+        sale_info = Sales(venue_id=new_venue_id, item_id=new_item_id, quantity_sold=total_quantity_amount)
+        session.add(sale_info)
+        session.commit()
+        print('Sales id: {} Venue id: {} Item id:'\
+         '{} Total Quantity: {}'.format(sale_info.id, sale_info.venue_id,
+                                       sale_info.item_id, sale_info.quantity_sold, sale_info.date_enter))
+        print("Successfully added to the database")
+        session.close()
+
+    except Exception as e:
+        print(e)
+        print("Error saving data to the databases. Please make sure you enter the right venue id and sales id ")
+        session.rollback() # Rollback the database
+        session.close()
+
 
 # Displays all items in the Merchandise table
 
@@ -196,14 +194,14 @@ def display_merchandise_data():
 # A method that display the update menu for each table
 
 
-def update_tables_info():
+def update_table_option():
     print("Enter 1 to update items in the Merchandise table")
     print("Enter 2 to update information in the Game table")
     print("Enter 3 to update quantity amount in the Sales table ")
 # A menu that displays the delete menu for each table
 
 
-def delete_table_data():
+def delete_table_option():
     print("Enter 1 to delete a row in the Game table")
     print("Enter 2 to delete a row in the Merchandise table")
     print("Enter 3 to delete a row from Sales table ")
@@ -254,22 +252,22 @@ def update_merchandise_item(new_item,  new_price, new_quantity, update_item):
 
 def update_game_table(new_stadium, new_location, new_date, update_item):
 
-       try:
-            update_item.stadium = new_stadium
-            update_item.game_location = new_location
-            update_item.game_date = new_date
+   try:
+        update_item.stadium = new_stadium
+        update_item.game_location = new_location
+        update_item.game_date = new_date
 
-            session.commit()
-            print('Successfully updated to: Item id: {} Item name: {}'\
-             'Price: {} Quantity: {} Date'\
-              'added: {}'.format(update_item.venue_id, update_item.stadium,
-                                update_item.game_location, update_item.game_date, update_item.date_updated.isoformat()))
-            session.close()
+        session.commit()
+        print('Successfully updated to: Item id: {} Item name: {}'\
+         'Price: {} Quantity: {} Date'\
+          'added: {}'.format(update_item.venue_id, update_item.stadium,
+                            update_item.game_location, update_item.game_date, update_item.date_updated.isoformat()))
+        session.close()
 
-       except Exception as e:
-            print("Error modifying data. Couldn't save data to the database")
-            print(e)
-            session.rollback()
+   except Exception as e:
+        print("Error modifying data. Couldn't save data to the database")
+        print(e)
+        session.rollback()
 
 
 # A method that is called to update the sales table
@@ -296,23 +294,22 @@ def update_sales_table(venue_new_id, new_id_item, new_quantity, update_item):
 
 
 def delete_game_table_row(user_response):
-    while True:
-        try:
 
-            for delete_row in session.query(Game).filter_by(venue_id=user_response):
-                session.delete(delete_row)
-            print('Row successfully deleted: venue id: {} Stadium: {} Game '\
-                  ' Location: {} Date added: {}'.format(delete_row.venue_id,
-                                                       delete_row.stadium, delete_row.game_location,
-                                                       delete_row.game_date, delete_row.date_updated.strftime("%A %d. %B %Y")))
-            session.commit()
-            session.close()
-            break
-        except Exception as e:
-            print(e)
-            print("Error deleting data from the database")
+    try:
 
-            continue
+        for delete_row in session.query(Game).filter_by(venue_id=user_response):
+            session.delete(delete_row)
+        print('Row successfully deleted: venue id: {} Stadium: {} Game '\
+              ' Location: {} Date added: {}'.format(delete_row.venue_id,
+                                                   delete_row.stadium, delete_row.game_location,
+                                                   delete_row.game_date, delete_row.date_updated.strftime("%A %d. %B %Y")))
+        session.commit()
+        session.close()
+
+    except Exception as e:
+        print(e)
+        print("Error deleting data from the database")
+
 
 # A method that deletes row in the Merchandise table
 
@@ -444,7 +441,7 @@ def main():
         elif choice == 4: # Choice to update information within this database
             user_choice = user_input("Are you sure you want to update information in the database Y/N? ").lower()
             if user_choice == 'y':
-                update_tables_info()
+                update_table_option()
                 choice_made = valid_integer("Please enter menu choice: ")
 
                 if choice_made == 1:
@@ -575,7 +572,7 @@ def main():
             # Display the appropriate menu
             valid_choice = user_input("Are you sure you want to delete information in the database Y/N? ").lower()
             if valid_choice == 'y':
-                delete_table_data()
+                delete_table_option()
                 user_choice = valid_integer("Please enter menu choice")
                 if user_choice == 1:
 
