@@ -10,9 +10,9 @@ session = Session()
 # A method that checks to make sure the date is in a specific format. Only 2017 is consider for this method
 
 
-def valid_date(display_message):
+def valid_date(date_enter_by_user):
     while True:
-        date_enter_by_user = input(display_message)
+
         try:
             if '/' in date_enter_by_user and len(date_enter_by_user) == 10 and date_enter_by_user[0:4] == '2017' and len(date_enter_by_user[5:7]) == 2 and len(date_enter_by_user[8:]) == 2:
                 new_date = date_enter_by_user = date_enter_by_user.split('/')
@@ -37,7 +37,7 @@ def valid_date(display_message):
 # A method that validates the user input to make user the user enters a valid input
 
 
-def user_input(display_message):
+def valid_user_input(display_message):
     user_enter_input = ""
     while True:
         user_enter_input = input(display_message)
@@ -50,7 +50,7 @@ def user_input(display_message):
 
 
 def enter_input(user_input_enter):
-    while  True:
+    while True:
         try:
 
             if user_input_enter > 0:
@@ -66,47 +66,53 @@ def enter_input(user_input_enter):
 # A method that checks and make the user enter a valid Integer
 
 
-def valid_integer(display_message):
-    user_input_enter = ''
-    while True:
-        try:
-            user_input_enter = int(input(display_message))
-            if user_input_enter > 0:
-                pass
-            elif user_input_enter < 0 or user_input_enter == 0:
-                print('Please  enter a value greater than zero')
-                continue
-        except ValueError:
-            print("Please avoid entering characters. Please enter a valid number")
-            continue
-        return user_input_enter
+def valid_integer(user_input_enter):
+
+    enter_value = 0
+    try:
+        enter_value = int(user_input_enter)
+        if enter_value > 0:
+            pass
+
+        elif enter_value < 0 or enter_value == 0:
+            print('Please  enter a value greater than zero')
+
+    except ValueError:
+        print("Please avoid entering characters. Please enter a valid number")
+
+    return enter_value
+
 
 # A method that validates the user input to ensure that valid price was entered
 
 
-def user_enter_price(message_display):
-    input_price = ''
+def user_enter_price(price_enter):
     while True:
-            try:
-                input_price = float(input(message_display))
-                if input_price < 0.00 or input_price == 0.00:
-                    print('Price must be number greater than zero')
-                    continue
-                elif input_price > 0:
-                    break
-                else:
-                    print("an input error occur, please review your input")
-                    continue
-            except ValueError:
-                print("Please enter decimal number! characters or invalid input can't be price")
+        input_price = 0
+
+        try:
+            input_price = float(price_enter)
+            if input_price < 0.00 or input_price == 0.00:
+                print('Price must be number greater than zero')
                 continue
-    return input_price
+
+            elif input_price > 0:
+                pass
+            else:
+                print("an input error occur, please review your input")
+                continue
+
+        except ValueError:
+            print("Please enter decimal number! characters or invalid input can't be price")
+            continue
+
+        return input_price
 
 
 # A method that adds a new game information to the database.
 # For instance, if we have a new game information, the user can add that game information
 
-def add_new_game_location_info(stadium_name, new_location, game_schedule_date):
+def add_game_info(stadium_name, new_location, game_schedule_date):
 
     try:
         new_game = Game(stadium=stadium_name, game_location=new_location, game_date=game_schedule_date)
@@ -232,9 +238,6 @@ def update_merchandise_item(new_item,  new_price, new_quantity, update_item):
         update_item.item_name = new_item
         update_item.item_price = new_price
         update_item.total_quantity = new_quantity
-        print('Item to be updated: Item id: {} Item name: {} Price: {} Quantity: {} Date added:'\
-        '{}'.format(update_item.id, update_item.item_name, update_item.item_price, update_item.total_quantity,
-                   update_item.date_added.isoformat()))
         session.commit()
         print('Successfully updated to: Item id: {} Item name: {} Price: {} Quantity:'\
          ' {} Date added: {}'.format(update_item.id, update_item.item_name,
@@ -337,7 +340,6 @@ def delete_merchandise_table_row(response_of_user):
 def delete_sales_table_row(query_response):
 
     try:
-        query_response = valid_integer("Please enter the Sales id of the row you want to delete: ")
         for delete_row in session.query(Sales).filter_by(id=query_response):
             session.delete(delete_row)
         print('Sales id: {}  Venue id: {} Iem id: {} Quantity sold: {} Date entered: '\
@@ -388,41 +390,42 @@ def find_max_quantity_amount():
 def main():
     while True:
         display_menus_options()
-        choice = valid_integer("Please enter a choice from the menu: ")
+
+        choice = valid_integer(user_input_enter = input("Please enter a choice from the menu "))
         # if choice is 1, ask the user if they actually wants to add information to the game table.
         # If user_choice is y display the game table and ask the user for inputs
         if choice == 1:
-            user_choice = user_input("Are you sure you want to enter data in the Game table? Please enter Y/N? ").lower()
+            user_choice = valid_user_input("Are you sure you want to enter data in the Game table? Please enter Y/N? ").lower()
             if user_choice == 'y':
                 print("Information currently available in the game table")
                 display_game_database()
-                stadium_name = user_input("Please enter the name for this stadium: ")
-                new_location = user_input(
+                stadium_name = valid_user_input("Please enter the name for this stadium: ")
+                new_location = valid_user_input(
                     "Please enter the city where {} stadium is located: ".format(stadium_name))
-                game_schedule_date = valid_date(
-                    'Please enter the schedule date for {} game. Valid year should be 2017: '.format(new_location))
-                add_new_game_location_info(stadium_name, new_location, game_schedule_date)
+                game_schedule_date = valid_date(date_enter_by_user = input('Please enter the schedule date for {} game. Valid year should be 2017:'.format(new_location)))
+
+                add_game_info(stadium_name, new_location, game_schedule_date)
             else:
                 continue
 
         # if choice is 2, ask the user if they actually wants to add information to the merchandise table.
         #  If user_choice is y display the merchandise database and ask the user for inputs
         elif choice == 2:
-            user_choice = user_input('Are you sure you want to enter data in the Merchandise table?'\
+            user_choice = valid_user_input('Are you sure you want to enter data in the Merchandise table?'\
              'Please enter Y/N? ').lower()
             if user_choice == 'y':
                 print("Items currently store in the in merchandise table: ")
                 display_merchandise_data()
-                new_item_name = user_input("Please enter the name of this item: ")
-                new_item_price = user_enter_price('Please enter the price for {}: '.format(new_item_name))
-                quantities = valid_integer('Please enter the quantity amount for {}'.format(new_item_name))
+                new_item_name = valid_user_input("Please enter the name of this item: ")
+                new_item_price = user_enter_price(price_enter= input('Please enter the price for {}: '.format(new_item_name)))
+                quantities = valid_integer(user_input_enter = input('Please enter the quantity amount for {}'.format(new_item_name)))
                 add_new_merchandise_item(new_item_name, new_item_price, quantities)
             else:
                 continue
             #  if choice is 3, ask the user if they actually wants to add information to the Sales table.
             #  If user_choice is y display the game and merchandise table and ask the user for inputs
         elif choice == 3:
-            user_choice = user_input("Are you sure you want to enter data in the Sales table? Please enter Y/N? ").lower()
+            user_choice = valid_user_input("Are you sure you want to enter data in the Sales table? Please enter Y/N? ").lower()
             if user_choice == 'y':
                 print("Current game schedule store in the database")
                 display_game_database()
@@ -432,160 +435,166 @@ def main():
                 display_merchandise_data()
                 print("current sales information in our database")
                 display_sale_table()
-                new_venue_id = valid_integer("Please enter the venue id for game table: ")
-                new_item_id = valid_integer("Please enter the item id from the merchandise table:  ")
-                total_quantity_amount = valid_integer("Please enter the quantity that was sold from the sales table: ")
+                new_venue_id = valid_integer(user_input_enter = input("Please enter the venue id for game table: "))
+                new_item_id = valid_integer(user_input_enter= input("Please enter the item id from the merchandise table:  "))
+                total_quantity_amount = valid_integer(user_input_enter = input("Please enter the quantity that was sold from the sales table: "))
                 add_sale_info(new_venue_id,  new_item_id, total_quantity_amount)
             else:
                 continue
         elif choice == 4: # Choice to update information within this database
-            user_choice = user_input("Are you sure you want to update information in the database Y/N? ").lower()
+            user_choice = valid_user_input("Are you sure you want to update information in the database Y/N? ").lower()
             if user_choice == 'y':
                 update_table_option()
-                choice_made = valid_integer("Please enter menu choice: ")
+                choice_made = valid_integer(user_input_enter = input("Please enter menu choice: "))
 
                 if choice_made == 1:
                     print("Current information store in the merchandise table")
                     display_merchandise_data()
-                    enter_choice = valid_integer("Please enter item id you would want to update: ")
-                    update_item = session.query(Merchandise).filter_by(id=enter_choice).one()
-                    response = user_input("Do you want to change {} Y/N? ".format(update_item.item_name)).lower()
-                    if response == "y":
-                        new_item = user_input("Please enter item new name for {}: ".format(update_item.item_name))
-                    elif response == 'n':
-                        new_item = update_item.item_name
+                    enter_choice = valid_integer(user_input_enter = input("Please enter item id you would want to update: "))
+                    if enter_choice > 0:
+                        update_item = session.query(Merchandise).filter_by(id=enter_choice).one()
+                        response = valid_user_input("Do you want to change {} Y/N? ".format(update_item.item_name)).lower()
+                        if response == "y":
+                            new_item = valid_user_input("Please enter item new name for {}: ".format(update_item.item_name))
+                        elif response == 'n':
+                            new_item = update_item.item_name
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
+
+                        response = valid_user_input("Do you want to change the price of {} Y/N? ".format(update_item.item_price)).lower()
+                        if response == 'y':
+                            new_price = user_enter_price(price_enter= input('Please enter new price for'\
+                             ' old price of {}: '.format(update_item.item_price)))
+                        elif response == 'n':
+                            new_price = update_item.item_price
+
+                        else:
+                            print("Entry not valid please enter a valid entry")
+
+                        response = valid_user_input('Do you want to change the current quantity of {}'\
+                         'Y/N? '.format(update_item.total_quantity)).lower()
+                        if response == 'y':
+                            new_quantity = valid_integer(user_input_enter=input('Please enter new price for old price'\
+                             ' of {}: '.format(update_item.total_quantity)))
+                        elif response == 'n':
+                            new_quantity = update_item.total_quantity
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
+
+                        update_merchandise_item(new_item,  new_price, new_quantity, update_item)
                     else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-                    response = user_input("Do you want to change the price of {} Y/N? ".format(update_item.item_price)).lower()
-                    if response == 'y':
-                        new_price = user_enter_price('Please enter new price for'\
-                         ' old price of {}: '.format(update_item.item_price))
-                    elif response == 'n':
-                        new_price = update_item.item_price
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-                    response = user_input('Do you want to change the current quantity of {}'\
-                     'Y/N? '.format(update_item.total_quantity)).lower()
-                    if response == 'y':
-                        new_quantity = valid_integer('Please enter new price for old price'\
-                         ' of {}: '.format(update_item.total_quantity))
-                    elif response == 'n':
-                        new_quantity = update_item.total_quantity
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-                    update_merchandise_item(new_item,  new_price, new_quantity, update_item)
+                        print("Please enter a valid input")
 
                 elif choice_made == 2:
                     print("Items currently store in the Game table")
                     display_game_database()
-                    enter_choice = valid_integer("Please enter venue id you would want to update: ")
-                    update_item = session.query(Game).filter_by(venue_id=enter_choice).one()
-                    print('Item to be updated: Venue id: {} Stadium name: {} Game location: {} Game date: {}' \
-                          'Date added: {}'.format(update_item.venue_id, update_item.stadium,
-                                                  update_item.game_location, update_item.game_date,
-                                                  update_item.date_updated.isoformat()))
-                    response = user_input("Do you want to change {} Y/N? ".format(update_item.stadium)).lower()
-                    if response == "y":
-                        new_stadium = user_input("Please enter item new name for {}: ".format(update_item.stadium))
+                    enter_choice = valid_integer(user_input_enter= input("Please enter venue id you would want to update: "))
+                    if enter_choice >0:
+                        update_item = session.query(Game).filter_by(venue_id=enter_choice).one()
+                        print('Item to be updated: Venue id: {} Stadium name: {} Game location: {} Game date: {}' \
+                              'Date added: {}'.format(update_item.venue_id, update_item.stadium,
+                                                      update_item.game_location, update_item.game_date,
+                                                      update_item.date_updated.isoformat()))
+                        response = valid_user_input("Do you want to change {} Y/N? ".format(update_item.stadium)).lower()
+                        if response == "y":
+                            new_stadium = valid_user_input("Please enter item new name for {}: ".format(update_item.stadium))
 
-                    elif response == 'n':
-                        new_stadium = update_item.stadium
+                        elif response == 'n':
+                            new_stadium = update_item.stadium
 
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-                    response = user_input('Do you want to change the game location' \
-                                          'for {} Y/N? '.format(update_item.game_location)).lower()
-                    if response == 'y':
-                        new_location = user_input(
-                            "Please enter new game location  {} game: ".format(update_item.game_location))
-                    elif response == 'n':
-                        new_location = update_item.game_location
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-                    response = user_input('Do you want want to change the game date'\
-                            'of  {}Y/N? '.format(update_item.game_date)).lower()
-                    if response == 'y':
-                        new_date = valid_date('Please enter new date to replace {} date Date format: YYYY/MM/DD' \
-                         ' or YYYY-MM-DD for 2017 only: '.format(update_item.game_date))
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
+                        response = valid_user_input('Do you want to change the game location' \
+                                              'for {} Y/N? '.format(update_item.game_location)).lower()
+                        if response == 'y':
+                            new_location = valid_user_input(
+                                "Please enter new game location  {} game: ".format(update_item.game_location))
+                        elif response == 'n':
+                            new_location = update_item.game_location
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
+                        response = valid_user_input('Do you want want to change the game date'\
+                                'of  {}Y/N? '.format(update_item.game_date)).lower()
+                        if response == 'y':
+                            new_date = valid_date(date_enter_by_user = input('Please enter the schedule date for {} game. Valid year should be 2017:'.format(new_location)))
+                        elif response == 'n':
+                            new_date = update_item.game_date
 
-                    elif response == 'n':
-                        new_date = update_item.game_date
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
 
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-
-                    # display_game_database()
-                    update_game_table(new_stadium, new_location, new_date, update_item)
+                        # display_game_database()
+                        update_game_table(new_stadium, new_location, new_date, update_item)
 
 
                 elif choice_made == 3:
 
                     print("Items currently store in the Game table")
                     display_sale_table()
-                    enter_choice = valid_integer("Please enter sale id you would want to update: ")
-                    update_item = session.query(Sales).filter_by(id=enter_choice).one()
-                    print('Item to be updated: Sale id: {} Venue id: {} Item id: {} Quantity sold: {}' \
-                          'Date added: {}'.format(update_item.id, update_item.venue_id,
-                                                  update_item.item_id, update_item.quantity_sold,
-                                                  update_item.date_enter.isoformat()))
-                    response = user_input(
-                        "Do you want to change venue id {} Y/N? ".format(update_item.venue_id)).lower()
-                    if response == "y":
-                        venue_new_id = user_input("Please new venue id for venue id {}: ".format(update_item.venue_id))
+                    enter_choice = valid_integer(user_input_enter = input("Please enter sale id you would want to update: "))
+                    if enter_choice >0:
+                        update_item = session.query(Sales).filter_by(id=enter_choice).one()
+                        print('Item to be updated: Sale id: {} Venue id: {} Item id: {} Quantity sold: {}' \
+                              'Date added: {}'.format(update_item.id, update_item.venue_id,
+                                                      update_item.item_id, update_item.quantity_sold,
+                                                      update_item.date_enter.isoformat()))
+                        response = valid_user_input(
+                            "Do you want to change venue id {} Y/N? ".format(update_item.venue_id)).lower()
+                        if response == "y":
+                            venue_new_id = valid_user_input("Please new venue id for venue id {}: ".format(update_item.venue_id))
 
-                    elif response == 'n':
-                        venue_new_id = update_item.venue_id
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
-                    response = user_input("Do you want to change item id {} Y/N? ".format(update_item.item_id)).lower()
-                    if response == 'y':
-                        new_id_item = user_input(
-                            "Please enter new item id for item id {}: ".format(update_item.item_id))
+                        elif response == 'n':
+                            venue_new_id = update_item.venue_id
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
+                        response = valid_user_input("Do you want to change item id {} Y/N? ".format(update_item.item_id)).lower()
+                        if response == 'y':
+                            new_id_item = valid_user_input(
+                                "Please enter new item id for item id {}: ".format(update_item.item_id))
 
-                    elif response == 'n':
-                        new_id_item = update_item.item_id
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
+                        elif response == 'n':
+                            new_id_item = update_item.item_id
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
 
-                    response = user_input(
-                        "Do you want to change the quantity of {}Y/N? ".format(update_item.quantity_sold)).lower()
-                    if response == 'y':
-                        new_quantity = valid_integer("Please enter new quantity amount\
-                               for {}: ".format(update_item.quantity_sold))
+                        response = valid_user_input(
+                            "Do you want to change the quantity of {}Y/N? ".format(update_item.quantity_sold)).lower()
+                        if response == 'y':
+                            new_quantity = valid_integer(user_input_enter= input("Please enter new quantity amount\
+                                   for {}: ".format(update_item.quantity_sold)))
 
-                    elif response == 'n':
-                        new_quantity = update_item.quantity_sold
-                    else:
-                        print("Entry not valid please enter a valid entry")
-                        continue
+                        elif response == 'n':
+                            new_quantity = update_item.quantity_sold
+                        else:
+                            print("Entry not valid please enter a valid entry")
+                            continue
 
-                    update_sales_table(venue_new_id,new_id_item, new_quantity, update_item)
+                        update_sales_table(venue_new_id,new_id_item, new_quantity, update_item)
         elif choice == 5:  # If choice is equals 5 as confirm if the user what wants delete information from the database.
             # Display the appropriate menu
-            valid_choice = user_input("Are you sure you want to delete information in the database Y/N? ").lower()
+            valid_choice = valid_user_input("Are you sure you want to delete information in the database Y/N? ").lower()
             if valid_choice == 'y':
                 delete_table_option()
-                user_choice = valid_integer("Please enter menu choice")
+                user_choice = valid_integer(user_input_enter = input("Please enter menu choice"))
                 if user_choice == 1:
 
                     display_game_database()
-                    user_response = valid_integer("Please enter the game id of the row you want to delete: ")
+                    user_response = valid_integer(user_input_enter= input("Please enter the game id of the row you want to delete: "))
                     delete_game_table_row(user_response)
                 elif user_choice == 2:
                     display_merchandise_data()
-                    response_of_user = valid_integer("Please enter the item id of the row you want to delete: ")
+                    response_of_user = valid_integer(user_input_enter=input("Please enter the item id of the row you want to delete: "))
                     delete_merchandise_table_row(response_of_user)
                 elif user_choice == 3:
                     display_sale_table()
-                    query_response = valid_integer("Please enter the Sales id of the row you want to delete: ")
+                    query_response = valid_integer(user_input_enter=input("Please enter the Sales id of the row you want to delete: "))
                     delete_sales_table_row(query_response)
         elif choice == 6:
             find_max_quantity_amount()
@@ -596,9 +605,10 @@ def main():
         elif choice == 9:
             display_game_database()
         elif choice ==10:
-            print("Shutting the database....")
+            print("Shutting down the database....")
             session.close()
             session.commit()
+
             break
 
 
