@@ -24,7 +24,7 @@ class Game(Base):
     venue_id = Column(Integer(), primary_key=True)
     stadium = Column(String(50), nullable=False)
     game_location =Column(String(50), nullable=False)
-    game_date = Column(String(50), default=datetime.now())
+    game_date = Column(String(50))
     date_updated = Column(DATETIME(), default=datetime.now())
 
     def __str__(self):
