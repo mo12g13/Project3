@@ -5,7 +5,8 @@ from sqlalchemy.orm import sessionmaker
 import tour_details
 
 
-# There is bug that I couldn't figure out. when you keep running the test, it keeps adding merchandise rows and as well as delete data from the database. I will figure out this bug.
+# There is bug that I couldn't figure out. when you keep running the test, it keeps adding merchandise rows and as
+#well as delete data from the database. I will figure out this bug.
 class TestGameOrm(unittest.TestCase):
     test_db = 'sqlite:///game_tour.db'
 
